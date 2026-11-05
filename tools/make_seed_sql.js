@@ -4,11 +4,9 @@
 const fs = require('fs');
 global.window = {};
 require('../data/question-bank.js');
-const all = window.BANK;
-if (!Array.isArray(all) || !all.length) throw new Error('bank kosong');
-// Hanya soal yang kuncinya terbukti (ada jawaban skor=1). Soal tanpa satu pun jawaban skor=1 (kunci dari review dokumentasi, atau belum terverifikasi) tidak ikut.
-const bank = all.filter(q => q.keyOrigin === 'score_result');
-console.log(`dikeluarkan ${all.length - bank.length} soal (semua jawaban teramati bernilai 0): ${all.filter(q => q.keyOrigin !== 'score_result').map(q => q.id).join(', ')}`);
+const bank = window.BANK;   // SEMUA soal ikut ke database; app.js memisahkan 'belum valid' (keyOrigin != score_result) ke bagian tersendiri
+if (!Array.isArray(bank) || !bank.length) throw new Error('bank kosong');
+console.log(`valid (ada skor=1): ${bank.filter(q => q.keyOrigin === 'score_result').length}; belum valid: ${bank.filter(q => q.keyOrigin !== 'score_result').length}`);
 const ids = new Set();
 const rows = bank.map(q => {
   if (ids.has(q.id)) throw new Error('id ganda: ' + q.id); ids.add(q.id);

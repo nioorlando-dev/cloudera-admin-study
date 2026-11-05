@@ -2,9 +2,12 @@
 const $ = s => document.querySelector(s);
 const app = $('#app');
 // Bank soal TIDAK ada di berkas situs: dimuat setelah login dari Supabase (hanya akun yang disetujui). Lihat setBank() dan enterApp().
-let BANK = [], GRADABLE = [], TOPICS = [], EXAM_QUESTIONS = 0;
+// BANK = soal VALID (ada jawaban skor=1); UNVALID = soal yang semua jawaban sumbernya bernilai 0 (kunci belum terbukti): ditampilkan di bagian sendiri, tidak dihitung akurasi/simulasi.
+let BANK = [], UNVALID = [], GRADABLE = [], TOPICS = [], EXAM_QUESTIONS = 0;
 function setBank(arr) {
-  BANK = Array.isArray(arr) ? arr : [];
+  const all = Array.isArray(arr) ? arr : [];
+  BANK = all.filter(q => q.keyOrigin === 'score_result');
+  UNVALID = all.filter(q => q.keyOrigin !== 'score_result').map(q => ({ ...q, gradable: false, _unvalid: true }));
   GRADABLE = BANK.filter(q => q.gradable);
   TOPICS = [...new Set(BANK.map(q => q.topic).filter(Boolean))];
   EXAM_QUESTIONS = Math.min(84, GRADABLE.length);
@@ -195,8 +198,9 @@ function renderHome() {
       <div class="card mode"><h3>Latihan cepat</h3><p>20 soal acak. Pembahasan tampil setelah tiap jawaban.</p><div class="row"><button class="btn" data-start="focus">Mulai</button></div></div>
       <div class="card mode"><h3>Soal baru</h3><p>Soal yang belum pernah kamu jawab.</p><div class="row"><button class="btn" data-start="new" ${st.unseen ? '' : 'disabled'}>Mulai</button><span class="count">${st.unseen} soal</span></div></div>
       <div class="card mode"><h3>Ulang yang salah</h3><p>Soal yang jawaban terakhirnya masih salah.</p><div class="row"><button class="btn" data-start="wrong" ${st.wrong ? '' : 'disabled'}>Mulai</button><span class="count">${st.wrong} soal</span></div></div>
-      <div class="card mode"><h3>Semua soal</h3><p>Seluruh bank soal, termasuk yang belum terverifikasi.</p><div class="row"><button class="btn" data-start="all">Mulai</button><span class="count">${BANK.length} soal</span></div></div>
+      <div class="card mode"><h3>Semua soal</h3><p>Seluruh soal valid (kunci terbukti).</p><div class="row"><button class="btn" data-start="all">Mulai</button><span class="count">${BANK.length} soal</span></div></div>
     </div></section>
+    ${UNVALID.length ? `<section class="section"><h2>Belum valid</h2><div class="card mode"><h3>Soal belum valid (${UNVALID.length})</h3><p>Soal ini ada di workbook, tapi semua jawaban dari sumber bernilai salah, jadi kuncinya belum terbukti. Tidak dihitung di akurasi dan simulasi. Coba cari tahu sendiri; jawaban yang sudah terbukti salah ditampilkan untuk membantu menyingkirkan pilihan.</p><div class="row"><button class="btn" data-start="unvalid">Lihat soal</button><span class="count">${UNVALID.length} soal</span></div></div></section>` : ''}
     <section class="section"><h2>Simulasi ujian</h2><div class="card mode exam-card">
       <p>Soal diacak dengan timer. Pilih: <b>mode belajar</b> (jawaban dan pembahasan langsung tampil setelah tiap soal) atau <b>mode ujian ketat</b> (pembahasan baru muncul setelah dikumpulkan).</p><p class="fine">Format ujian asli: ${EXAM_QUESTIONS} soal, ${EXAM_MINUTES} menit. Kamu bisa ubah jumlah soal (maks. ${GRADABLE.length}) dan waktunya. Target lulus ${PASS_MARK}% adalah patokan latihan.</p>
       <div class="exam-fields"><label>Jumlah soal<input id="examN" type="number" inputmode="numeric" min="1" max="${GRADABLE.length}" value="${examDefaults().n}"></label>
@@ -206,7 +210,7 @@ function renderHome() {
     <section class="section"><h2>Latihan per topik</h2><div class="topics">${topicCards()}</div></section>
     <section class="section"><h2>Sesi terakhir</h2><div class="card history">${hist}</div></section>
     <details class="card about"><summary>Tentang bank soal &amp; status verifikasi</summary><div class="in">
-      <p>Bank soal digabung dari hasil empat kontributor (EFN, ADM, HMW, RLN). Total ${BANK.length} soal unik, ${GRADABLE.length} di antaranya dihitung dalam akurasi.</p>
+      <p>Bank soal digabung dari hasil empat kontributor (EFN, ADM, HMW, RLN). Total ${BANK.length} soal valid (dihitung dalam akurasi), ditambah ${UNVALID.length} soal belum valid yang ditampilkan terpisah.</p>
       <table class="source-table"><tr><th>Sumber</th><th>Soal</th><th>Irisan</th></tr>
         <tr><td>EFN</td><td>84</td><td>Hasil dasar</td></tr><tr><td>ADM</td><td>84</td><td>Hasil dasar</td></tr><tr><td>RLN</td><td>84</td><td>Hasil dasar</td></tr>
         <tr><td>HMW</td><td>84</td><td>EFN 73 · ADM 70 · RLN 73 · 1 soal baru</td></tr></table>
@@ -222,13 +226,14 @@ function topicCards() {
       <div class="bar"><span style="width:${p}%"></span></div><button class="btn" data-topic="${esc(t)}">Latihan</button></div>`;
   }).join('');
 }
-function modeLabel(m) { if (m === 'exam') return 'Simulasi ujian'; if (m && m.startsWith('topic:')) return 'Topik: ' + m.slice(6); return ({ focus: 'Latihan cepat', new: 'Soal baru', wrong: 'Ulang yang salah', all: 'Semua soal', migrated: 'Sesi lama' })[m] || 'Latihan'; }
+function modeLabel(m) { if (m === 'exam') return 'Simulasi ujian'; if (m && m.startsWith('topic:')) return 'Topik: ' + m.slice(6); return ({ focus: 'Latihan cepat', new: 'Soal baru', wrong: 'Ulang yang salah', all: 'Semua soal', migrated: 'Sesi lama', unvalid: 'Belum valid' })[m] || 'Latihan'; }
 
 /* ---------- sesi ---------- */
 function startSession(mode, arg) {
   let pool, n, exam = null;
   if (mode === 'wrong') pool = GRADABLE.filter(q => progress.last[q.id] === false);
   else if (mode === 'new') pool = GRADABLE.filter(q => progress.attempts[q.id] === undefined);
+  else if (mode === 'unvalid') pool = UNVALID;
   else if (mode === 'topic') { pool = BANK.filter(q => q.topic === arg); mode = 'topic:' + arg; }
   else if (mode === 'exam') {
     const pr = arg || examDefaults();
@@ -273,9 +278,9 @@ function renderSession() {
   const alert = STATUS_ALERT[q.status];
   $('#meta').innerHTML = S.exam
     ? (S.exam.flags[q.id] ? '<span class="tag warn">Ditandai</span>' : '')
-    : `${q.topic ? `<span class="tag topic">${esc(q.topic)}</span>` : ''}${alert ? `<span class="tag ${statusClass(q.status)}" title="${esc(alert.tip)}">${esc(alert.label)}</span>` : ''}`;
+    : `${q.topic ? `<span class="tag topic">${esc(q.topic)}</span>` : ''}${q._unvalid ? '<span class="tag warn" title="Semua jawaban dari sumber bernilai salah; kunci belum terbukti.">Belum valid</span>' : alert ? `<span class="tag ${statusClass(q.status)}" title="${esc(alert.tip)}">${esc(alert.label)}</span>` : ''}`;
   $('#qtext').textContent = q.question;
-  $('#helper').textContent = S.exam ? (multi ? `Pilih ${q.choose} jawaban.` : 'Pilih satu jawaban.') : q.gradable ? (multi ? `Pilih ${q.choose} jawaban.` : 'Pilih satu jawaban.') : 'Soal ini belum punya kunci yang bisa dipastikan, jadi tidak dihitung di akurasi.';
+  $('#helper').textContent = S.exam ? (multi ? `Pilih ${q.choose} jawaban.` : 'Pilih satu jawaban.') : q.gradable ? (multi ? `Pilih ${q.choose} jawaban.` : 'Pilih satu jawaban.') : (q._unvalid ? 'Belum valid: semua jawaban dari sumber salah. Coba tebak dulu, lalu lihat apa yang sudah terbukti salah.' : 'Soal ini belum punya kunci yang bisa dipastikan, jadi tidak dihitung di akurasi.');
   $('#options').innerHTML = q.options.map((o, i) => {
     const selected = sel.map(norm).includes(norm(o)), right = q.correct.map(norm).includes(norm(o));
     const cls = 'option' + (selected ? ' selected' : '') + (done && q.gradable ? (right ? ' correct' : selected ? ' wrong' : '') : '');
@@ -323,7 +328,20 @@ function srcCodes(q) {
   const set = new Set((q.observed || []).map(o => String(o.source || '?').trim().charAt(0).toUpperCase()).map(c => SRC_CODE[c] || c));
   return [...set].sort((a, b) => (SRC_ORDER.indexOf(a) + 99) % 99 - (SRC_ORDER.indexOf(b) + 99) % 99 || a.localeCompare(b));
 }
+function unvalidHtml(q) {
+  const tried = [...new Set((q.observed || []).filter(o => o.score === 0).map(o => String(o.answer)))];
+  const list = a => a.split(':').map(x => '• ' + esc(x.trim())).join('<br>');
+  const wrong = tried.length ? tried.map((a, i) => `<p style="margin-top:${i ? 10 : 0}px"><b>Percobaan ${i + 1}</b><br>${list(a)}</p>`).join('') : '<p>Belum ada data percobaan.</p>';
+  const guess = q.correct && q.correct.length ? q.correct.map(x => '• ' + esc(x)).join('<br>') : 'Belum ada dugaan yang bisa dipastikan.';
+  const who = srcCodes(q);
+  const ref = q.reference ? `<a href="${esc(q.reference.url)}" target="_blank" rel="noreferrer noopener">${esc(q.reference.title)}</a> <span class="src">· ${esc(q.reference.kind)}</span>` : '<span class="src">Belum ada halaman dokumentasi resmi yang cocok.</span>';
+  return `<div class="feedback bad"><h3>Belum valid, cari tahu sendiri</h3>
+    <div class="block"><h4>Sudah terbukti SALAH (skor 0 di workbook)</h4>${wrong}</div>
+    <div class="block"><details><summary>Lihat dugaan dari dokumentasi (BELUM terbukti)</summary><p style="margin-top:8px">${guess}</p><p class="src" style="margin-top:8px">${esc(q.explanation)}</p></details></div>
+    <div class="block"><details><summary>Sumber dan referensi</summary><p class="src">${who.length ? 'Soal ada di: ' + who.join(', ') : 'Belum ada data sumber'}</p><p>${ref}</p></details></div></div>`;
+}
 function feedbackHtml(q) {
+  if (q._unvalid) return unvalidHtml(q);
   const r = S.results[q.id];
   const cls = r === true ? 'ok' : r === false ? 'bad' : '';
   const title = r === true ? 'Benar' : r === false ? 'Belum tepat, ini yang perlu diingat' : 'Soal belum terverifikasi, tidak dinilai';
@@ -363,6 +381,7 @@ function prev() { if (S.idx > 0) { S.idx--; renderSession(); } }
 async function saveSession() {
   if (S.finished) return;
   S.finished = true;
+  if (S.mode === 'unvalid') return;   // tidak dinilai, tidak masuk riwayat/akurasi
   const checked = Object.keys(S.checked).length;
   const g = Object.values(S.results).filter(v => v === true || v === false);
   if (!checked) return;
