@@ -245,3 +245,11 @@ td .btn{padding:6px 12px}
 /* tombol aksi sesi: boleh turun baris rapi bila sempit (mode belajar di ujian punya 4 tombol) */
 .actions{flex-wrap:wrap}
 .actions .right{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end;margin-left:auto}
+
+/* daftar soal belum valid (baca-saja) di dashboard */
+details.uv{border-top:1px solid var(--border);padding:10px 0}
+details.uv summary{cursor:pointer;font-weight:600;font-size:14px;line-height:1.5;color:var(--text)}
+.uv-in{padding:10px 0 4px}
+.uv-in h4{font-size:11px;text-transform:uppercase;letter-spacing:.07em;color:var(--muted);margin:12px 0 4px}
+.uv-in p{margin:0 0 6px;font-size:14px;line-height:1.6;color:var(--text)}
+.uv-in p.src{color:var(--muted);font-size:12px}
