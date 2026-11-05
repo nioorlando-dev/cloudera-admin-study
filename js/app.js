@@ -206,10 +206,10 @@ function renderHome() {
     <section class="section"><h2>Latihan per topik</h2><div class="topics">${topicCards()}</div></section>
     <section class="section"><h2>Sesi terakhir</h2><div class="card history">${hist}</div></section>
     <details class="card about"><summary>Tentang bank soal &amp; status verifikasi</summary><div class="in">
-      <p>Bank soal digabung dari hasil empat kontributor (E, A, R, H). Total ${BANK.length} soal unik, ${GRADABLE.length} di antaranya dihitung dalam akurasi.</p>
+      <p>Bank soal digabung dari hasil empat kontributor (EFN, ADM, HMW, RLN). Total ${BANK.length} soal unik, ${GRADABLE.length} di antaranya dihitung dalam akurasi.</p>
       <table class="source-table"><tr><th>Sumber</th><th>Soal</th><th>Irisan</th></tr>
-        <tr><td>E</td><td>84</td><td>Hasil dasar</td></tr><tr><td>A</td><td>84</td><td>Hasil dasar</td></tr><tr><td>R</td><td>84</td><td>Hasil dasar</td></tr>
-        <tr><td>H</td><td>84</td><td>E 73 · A 70 · R 73 · 1 soal baru</td></tr></table>
+        <tr><td>EFN</td><td>84</td><td>Hasil dasar</td></tr><tr><td>ADM</td><td>84</td><td>Hasil dasar</td></tr><tr><td>RLN</td><td>84</td><td>Hasil dasar</td></tr>
+        <tr><td>HMW</td><td>84</td><td>EFN 73 · ADM 70 · RLN 73 · 1 soal baru</td></tr></table>
       <div class="notice"><b>Terverifikasi</b>: kunci dari skor=1 dan cocok dengan dokumentasi resmi. <b>Dari hasil ujian</b>: kunci dari hasil ujian, belum ada referensi langsung. <b>Beda dengan dokumentasi</b>: hasil ujian berbeda dengan dokumentasi terkini. <b>Dari dokumentasi</b>: kunci dari dokumentasi karena tidak ada skor=1. <b>Belum terverifikasi</b>: kunci tidak bisa dipastikan, tidak dihitung di akurasi.</div>
       <p class="footer">Materi latihan pribadi berdasarkan workbook yang diberikan. Cloudera dan logo Cloudera adalah merek dagang Cloudera, Inc. Bukan produk ujian resmi Cloudera.</p>
     </div></details>`);
@@ -318,6 +318,11 @@ function checkAnswer() {
   } else S.results[q.id] = null;
   renderSession();
 }
+const SRC_CODE = { E: 'EFN', A: 'ADM', H: 'HMW', R: 'RLN' }, SRC_ORDER = ['EFN', 'ADM', 'HMW', 'RLN'];
+function srcCodes(q) {
+  const set = new Set((q.observed || []).map(o => String(o.source || '?').trim().charAt(0).toUpperCase()).map(c => SRC_CODE[c] || c));
+  return [...set].sort((a, b) => (SRC_ORDER.indexOf(a) + 99) % 99 - (SRC_ORDER.indexOf(b) + 99) % 99 || a.localeCompare(b));
+}
 function feedbackHtml(q) {
   const r = S.results[q.id];
   const cls = r === true ? 'ok' : r === false ? 'bad' : '';
@@ -326,13 +331,9 @@ function feedbackHtml(q) {
   const mine = r === false ? `<div class="block yours"><h4>Jawabanmu</h4><p>${(S.answers[q.id] || []).map(x => '• ' + esc(x)).join('<br>')}</p></div>` : '';
   const key = q.gradable ? `<div class="block key"><h4>Jawaban benar</h4><p>${q.correct.map(x => '• ' + esc(x)).join('<br>')}</p></div>`
     : `<div class="block"><h4>Kunci jawaban</h4><p>Belum ada kunci yang bisa dipastikan dari workbook. Semua percobaan bernilai 0, atau soal hasil ekspor terpotong.</p></div>`;
-  // sumber ditampilkan sebagai INISIAL (huruf pertama nama dari data; tidak ada nama di kode publik): siapa saja yang punya soal ini
-  const ini = n => String(n || '?').trim().charAt(0).toUpperCase();
-  const who = [...new Set((q.observed || []).map(o => o.source))].map(ini);
-  const whoTxt = who.length ? `Soal ada di: ${who.join(', ')}` : 'Belum ada data sumber';
-  const win = [...new Set((q.keySources || []).filter(n => n && !/review|official/i.test(n)).map(ini))];
-  const ev = q.keyOrigin === 'score_result' ? `${whoTxt}${win.length ? ` · kunci cocok dengan hasil: ${win.join(', ')}` : ''}`
-    : q.keyOrigin === 'reviewed' ? `${whoTxt} · kunci disusun dari review dokumentasi/referensi.` : whoTxt;
+  // sumber ditampilkan sebagai KODE 3 huruf (dipetakan dari huruf pertama nama di data; tidak ada nama lengkap di kode publik)
+  const who = srcCodes(q);
+  const ev = who.length ? `Soal ada di: ${who.join(', ')}` : 'Belum ada data sumber';
   const ref = q.reference ? `<a href="${esc(q.reference.url)}" target="_blank" rel="noreferrer noopener">${esc(q.reference.title)}</a> <span class="src">· ${esc(q.reference.kind)}</span>` : '<span class="src">Belum ada halaman dokumentasi resmi yang cocok.</span>';
   const rev = q.revisionNote ? `<p><b>Catatan revisi workbook:</b> ${esc(q.revisionNote)}</p>` : '';
   const conf = q.status === 'RESULT / DOC CONFLICT' ? `<div class="block"><h4>Konflik dokumentasi</h4><p>Kunci hasil ujian dan dokumentasi produk saat ini tidak sepenuhnya sejalan. Pakai kunci ini untuk mengenali soal ujian; pakai dokumentasi untuk administrasi sebenarnya.</p></div>` : '';
