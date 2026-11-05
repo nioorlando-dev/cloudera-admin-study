@@ -326,7 +326,13 @@ function feedbackHtml(q) {
   const mine = r === false ? `<div class="block yours"><h4>Jawabanmu</h4><p>${(S.answers[q.id] || []).map(x => '• ' + esc(x)).join('<br>')}</p></div>` : '';
   const key = q.gradable ? `<div class="block key"><h4>Jawaban benar</h4><p>${q.correct.map(x => '• ' + esc(x)).join('<br>')}</p></div>`
     : `<div class="block"><h4>Kunci jawaban</h4><p>Belum ada kunci yang bisa dipastikan dari workbook. Semua percobaan bernilai 0, atau soal hasil ekspor terpotong.</p></div>`;
-  const ev = q.keyOrigin === 'score_result' ? `Bukti skor=1: ${esc((q.keySources || []).join(', '))}` : q.keyOrigin === 'reviewed' ? 'Tidak ada skor=1; kunci disusun dari review dokumentasi/referensi.' : 'Tidak ada jawaban hasil yang diterima.';
+  // sumber ditampilkan sebagai INISIAL (huruf pertama nama dari data; tidak ada nama di kode publik): siapa saja yang punya soal ini
+  const ini = n => String(n || '?').trim().charAt(0).toUpperCase();
+  const who = [...new Set((q.observed || []).map(o => o.source))].map(ini);
+  const whoTxt = who.length ? `Soal ada di: ${who.join(', ')}` : 'Belum ada data sumber';
+  const win = [...new Set((q.keySources || []).filter(n => n && !/review|official/i.test(n)).map(ini))];
+  const ev = q.keyOrigin === 'score_result' ? `${whoTxt}${win.length ? ` · kunci cocok dengan hasil: ${win.join(', ')}` : ''}`
+    : q.keyOrigin === 'reviewed' ? `${whoTxt} · kunci disusun dari review dokumentasi/referensi.` : whoTxt;
   const ref = q.reference ? `<a href="${esc(q.reference.url)}" target="_blank" rel="noreferrer noopener">${esc(q.reference.title)}</a> <span class="src">· ${esc(q.reference.kind)}</span>` : '<span class="src">Belum ada halaman dokumentasi resmi yang cocok.</span>';
   const rev = q.revisionNote ? `<p><b>Catatan revisi workbook:</b> ${esc(q.revisionNote)}</p>` : '';
   const conf = q.status === 'RESULT / DOC CONFLICT' ? `<div class="block"><h4>Konflik dokumentasi</h4><p>Kunci hasil ujian dan dokumentasi produk saat ini tidak sepenuhnya sejalan. Pakai kunci ini untuk mengenali soal ujian; pakai dokumentasi untuk administrasi sebenarnya.</p></div>` : '';
