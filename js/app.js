@@ -206,10 +206,10 @@ function renderHome() {
     <section class="section"><h2>Latihan per topik</h2><div class="topics">${topicCards()}</div></section>
     <section class="section"><h2>Sesi terakhir</h2><div class="card history">${hist}</div></section>
     <details class="card about"><summary>Tentang bank soal &amp; status verifikasi</summary><div class="in">
-      <p>Bank soal digabung dari hasil Efan, Adam, Ruslan, dan Hermawan. Total ${BANK.length} soal unik, ${GRADABLE.length} di antaranya dihitung dalam akurasi.</p>
+      <p>Bank soal digabung dari hasil empat kontributor (E, A, R, H). Total ${BANK.length} soal unik, ${GRADABLE.length} di antaranya dihitung dalam akurasi.</p>
       <table class="source-table"><tr><th>Sumber</th><th>Soal</th><th>Irisan</th></tr>
-        <tr><td>Efan</td><td>84</td><td>Hasil dasar</td></tr><tr><td>Adam</td><td>84</td><td>Hasil dasar</td></tr><tr><td>Ruslan</td><td>84</td><td>Hasil dasar</td></tr>
-        <tr><td>Hermawan</td><td>84</td><td>Efan 73 · Adam 70 · Ruslan 73 · 1 soal baru</td></tr></table>
+        <tr><td>E</td><td>84</td><td>Hasil dasar</td></tr><tr><td>A</td><td>84</td><td>Hasil dasar</td></tr><tr><td>R</td><td>84</td><td>Hasil dasar</td></tr>
+        <tr><td>H</td><td>84</td><td>E 73 · A 70 · R 73 · 1 soal baru</td></tr></table>
       <div class="notice"><b>Terverifikasi</b>: kunci dari skor=1 dan cocok dengan dokumentasi resmi. <b>Dari hasil ujian</b>: kunci dari hasil ujian, belum ada referensi langsung. <b>Beda dengan dokumentasi</b>: hasil ujian berbeda dengan dokumentasi terkini. <b>Dari dokumentasi</b>: kunci dari dokumentasi karena tidak ada skor=1. <b>Belum terverifikasi</b>: kunci tidak bisa dipastikan, tidak dihitung di akurasi.</div>
       <p class="footer">Materi latihan pribadi berdasarkan workbook yang diberikan. Cloudera dan logo Cloudera adalah merek dagang Cloudera, Inc. Bukan produk ujian resmi Cloudera.</p>
     </div></details>`);
