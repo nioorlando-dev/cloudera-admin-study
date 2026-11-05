@@ -3,7 +3,7 @@
 Situs latihan soal ujian Cloudera Administrator. Statis (HTML/CSS/JS) + Supabase untuk login dan progres per akun.
 
 - **Setup login & hosting:** lihat [SETUP.md](SETUP.md)
-- **Bank soal:** `data/question-bank.js` (102 soal unik, 94 dinilai, 8 belum terverifikasi)
+- **Bank soal:** `data/question-bank.js` (85 soal (semua kuncinya terbukti dari jawaban skor=1; 17 soal yang semua jawabannya bernilai 0 dikeluarkan))
 - **Audit validasi:** `data/validation-audit.json`
 - **Versi lama (v3, satu file):** `_backup/`
 
