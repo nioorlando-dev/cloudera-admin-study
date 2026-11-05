@@ -357,7 +357,7 @@ function feedbackHtml(q) {
   const rev = q.revisionNote ? `<p><b>Catatan revisi workbook:</b> ${esc(q.revisionNote)}</p>` : '';
   const conf = q.status === 'RESULT / DOC CONFLICT' ? `<div class="block"><h4>Konflik dokumentasi</h4><p>Kunci hasil ujian dan dokumentasi produk saat ini tidak sepenuhnya sejalan. Pakai kunci ini untuk mengenali soal ujian; pakai dokumentasi untuk administrasi sebenarnya.</p></div>` : '';
   return `<div class="feedback ${cls}"><h3>${title}</h3>${mine}${key}<div class="block why"><h4>Kenapa</h4><p>${esc(q.explanation)}</p></div>${conf}
-    <div class="block"><details><summary>Bukti, sumber, dan catatan</summary><p class="src">${ev}</p><p>${ref}</p>${rev}<p class="src">Pilihan jawaban di sini direkonstruksi dari jawaban yang teramati di workbook; bukan salinan resmi soal ujian.</p></details></div></div>`;
+    <div class="block"><details><summary>Bukti, sumber, dan catatan</summary><p class="src">${ev}</p><p>${ref}</p>${rev}</details></div></div>`;
 }
 function renderGrid() {
   $('#qgrid').innerHTML = S.questions.map((q, i) => {
