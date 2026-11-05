@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Cloudera Administrator Study</title>
+<meta name="description" content="Latihan soal persiapan ujian Cloudera Administrator untuk tim.">
+<script>try{var t=localStorage.getItem('clouderaTheme');if(!t)t=matchMedia('(prefers-color-scheme: dark)').matches?'dark':'light';document.documentElement.dataset.theme=t}catch(e){}</script>
+<link rel="stylesheet" href="css/style.css?v=14">
+</head>
+<body>
+<header class="top">
+  <button class="brand" data-action="home" aria-label="Ke dashboard">
+    <img class="logo" src="https://kr.cloudera.com/content/dam/www/marketing/media-kit/logo-assets/cloudera_logo_darkorange.png" alt="Cloudera" onerror="this.style.display='none';document.getElementById('fallbackLogo').style.display='block'">
+    <span id="fallbackLogo" class="wordmark" style="display:none">CLOUDERA</span>
+    <span class="sep"></span>
+    <span class="product">Administrator Study<small>Latihan soal ujian</small></span>
+  </button>
+  <div class="top-right">
+    <button class="icon-btn" data-action="theme" aria-label="Ganti tema" title="Ganti tema" id="themeBtn">◐</button>
+    <button class="user-chip hidden" id="userChip" data-action="menu" aria-haspopup="true"><span class="avatar" id="avatar">?</span><span class="nm" id="userName"></span></button>
+  </div>
+</header>
+<div class="menu hidden" id="menu"></div>
+
+<main id="app" class="container"><div class="spinner" role="status" aria-label="Memuat"></div></main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+<script src="js/config.js?v=14"></script>
+<script src="js/store.js?v=14"></script>
+<script src="js/app.js?v=14"></script>
+</body>
+</html>

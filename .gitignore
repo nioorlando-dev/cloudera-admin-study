@@ -1,0 +1,11 @@
+# jangan ikut ke GitHub: cadangan lokal, arsip, berkas sistem
+_backup/
+*.zip
+.DS_Store
+
+# bank soal dan kunci TIDAK boleh ke repo (disajikan dari Supabase hanya untuk akun yang disetujui)
+data/
+supabase/seed_questions.sql
+
+# berkas lama yang salah (memakai question-bank-v3.json tanpa field topic); sudah digantikan tools/make_seed_sql.js; hapus manual
+tools/make_seed_sql.py
